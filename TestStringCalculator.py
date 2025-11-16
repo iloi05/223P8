@@ -35,6 +35,42 @@ class TestStringCalculator(unittest.TestCase):
     def test_numbers_past_1000_ignored(self):
         self.assertEqual(self.sc.add("7,7777"), 7)
 
+    def test_1000_not_ignored(self):
+        self.assertEqual(self.sc.add("7,1000"), 1007)
+
+    def test_neg_num_exception_raised(self):
+        with self.assertRaises(ValueError):
+            self.sc.add("-7,-7")
+    
+    def test_multiple_negative_numbers_produce_list_in_message(self):
+        with self.assertRaises(ValueError) as context:
+            self.sc.add("1,-2,-4")
+        self.assertIn("-2", str(context.exception))
+        self.assertIn("-4", str(context.exception))
+
+    def test_nonnumeric_vals_ignored(self):
+        self.assertEqual(self.sc.add("3,seven,4"), 7)
+
+    def test_skip_empty_tokens(self):
+        self.assertEqual(self.sc.add("3,,4"), 7)
+
+    def test_custom_delimiter_without_brackets(self):
+        self.assertEqual(self.sc.add("//*\n2*5"), 7)
+
+    def test_multiple_delimiters_inside_brackets(self):
+        self.assertEqual(self.sc.add("//[*][%]\n1*1%5"), 7)
+
+    def test_whitespace_ignored(self):
+        self.assertEqual(self.sc.add("1, ,6"), 7)
+
+    def test_neg_num_in_custom_delimiter(self):
+        with self.assertRaises(ValueError) as context:
+            self.sc.add("//;\n1;-1;5")
+        self.assertIn("-1", str(context.exception))
+
+    def test_long_multichar_delimiter_mixing_newline(self):
+        self.assertEqual(self.sc.add("//[abc]\n1abc2\n4"), 7)
+
 
 if __name__ == '__main__':
     unittest.main()
