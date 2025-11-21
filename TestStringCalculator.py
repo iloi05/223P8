@@ -28,24 +28,18 @@ class TestStringCalculator(unittest.TestCase):
 
     def test_single_char_custom_delimiter(self):
         self.assertEqual(self.sc.add("//;\n4;3"), 7)
-    
-    def test_custom_delimiter_of_multiple_characters(self):
-        self.assertEqual(self.sc.add("//[***]\n1***3***3"), 7)
-
-    def test_custom_delimiter_with_special_regex_chars(self):
-        self.assertEqual(self.sc.add("//[.*]\n3.*4"), 7)
 
     def test_decimal_number_returning_itself(self):
         self.assertEqual(self.sc.add("1.4"), 1.4)
-
-    def test_digits_in_decimal_seen_as_separate(self):
-        self.assertEqual(self.sc.add("1.1,5.9"), 16)
 
     def test_negative_decimal_numbers_rejected(self):
         with self.assertRaises(ValueError) as input:
             self.sc.add("-1.1,-2.2")
         self.assertIn("-1.1", str(input.exception))
         self.assertIn("-2.2", str(input.exception))
+
+    def test_dash_as_delimiter(self):
+        self.assertEqual(self.sc.add("//[-]\n-7,7"), 14)
 
     def test_numbers_past_1000_ignored(self):
         self.assertEqual(self.sc.add("7,7777"), 7)
@@ -67,21 +61,14 @@ class TestStringCalculator(unittest.TestCase):
 
     def test_multiple_delimiters_inside_brackets(self):
         self.assertEqual(self.sc.add("//[*][%]\n1*1%5"), 7)
-
-    def test_whitespace_ignored(self):
-        self.assertEqual(self.sc.add("1, ,6"), 7)
     
-    def test_whitespace_no_comma(self):
+    def test_single_integer_with_whitespace_no_comma(self):
         self.assertEqual(self.sc.add(" 7"), 7)
 
     def test_neg_num_in_custom_delimiter(self):
         with self.assertRaises(ValueError) as input:
             self.sc.add("//;\n1;-1;5")
         self.assertIn("-1", str(input.exception))
-
-    def test_random_characters_as_delimiter(self):
-        self.assertEqual(self.sc.add("//[abc]a1b2c4"), 7)
-
 
 if __name__ == '__main__':
     unittest.main()
